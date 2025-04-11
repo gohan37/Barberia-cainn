@@ -1,0 +1,163 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  @font-face {
+    font-family: 'BattlesbridgeDemoRegular';
+    src: url('BattlesbridgeDemoRegular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+   
+  body {
+    background-image: url("barberia2.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    animation: fadeInFondo 4s ease-in-out;
+  }
+  
+  @keyframes fadeInFondo {
+    from {
+      opacity: 0;
+      transform: scale(1.05);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  
+  header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+   h1 {
+    text-align: center;
+    font-size: 2.5rem;
+    color: #a8a5a0;
+    padding-top: 10px;
+    padding-block: 50px;
+    font-family: "BattlesbridgeDemoRegular", sans-serif;
+  }
+  h2{
+    font-family: "BattlesbridgeDemoRegular", sans-serif;
+    text-align: center;
+    color: #f3efe8;
+    background-color: #0000006e;
+   
+  }
+  p{
+    color: rgb(243, 241, 239);
+    background-color: #4444447e;
+  }
+  
+  #precio-corte {
+    font-size: 1.2rem;
+    margin-top: 10px;
+    color: #00ffae;
+
+  }
+  
+  main {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .turno-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+    
+  }
+  
+  .turno {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    padding: 10px 15px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .turno.disponible {
+    color: #979997;
+   
+  }
+  
+  .turno.ocupado {
+    color: #ff8080;
+  }
+
+  .turno {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 8px;
+    background-color: #1f1f1f;
+    border-radius: 8px;
+    color: #90ee90;
+  }
+  
+  .btn-agendar {
+    background-color: #ff8c00;
+    color: black;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
+  .btn-agendar:hover {
+    background-color: #ffa500;
+  }
+  .calesita-vertical {
+    max-height: 300px; /* altura visible */
+    overflow-y: auto;
+    border: 2px solid #444;
+    border-radius: 10px;
+    padding-right: 5px;
+    scroll-behavior: smooth;
+    
+  }
+  
+  /* Estilazo al scroll para que se vea pro */
+  .calesita-vertical::-webkit-scrollbar {
+    width: 8px;
+  }
+  .calesita-vertical::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+  }
+  .calesita-vertical::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+ 
+  
+  footer {
+    height: 80px;
+    background-color: #111;
+    color: #bbb;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.9rem;
+    margin-top: auto;
+  }

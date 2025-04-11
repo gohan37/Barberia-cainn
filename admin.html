@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Admin - Cain</title>
+  <link rel="stylesheet" href="admin.css"> <!-- si querés estilizar -->
+</head>
+<body>
+  <h1>Panel de Administrador</h1>
+  <div id="turnos-container"></div>
+
+  <section id="precio-config">
+    <h2>Modificar precio del corte 💈</h2>
+    <p>Precio actual: $<span id="precio-actual">...</span></p>
+    <input type="number" id="nuevo-precio" placeholder="Nuevo precio" />
+    <button id="guardar-precio">Guardar</button>
+    <p id="mensaje-precio" style="color: green;"></p>
+  </section>
+
+
+  <div id="modal-horarios" class="modal">
+    <div class="modal-contenido">
+      <h3>Seleccioná el nuevo horario</h3>
+
+      <div id="carrusel-horarios"></div>
+      <button id="confirmar-cambio">Confirmar</button>
+      <button id="cancelar-cambio">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  
+  <script type="module">
+    import { firebaseConfig } from './firebase-config.js';
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, deleteDoc, updateDoc, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    // Mostrar precio actual
+async function cargarPrecioActual() {
+  const docRef = doc(db, "config", "precio");
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    const data = docSnap.data();
+    document.getElementById("precio-actual").textContent = data.valor;
+  } else {
+    document.getElementById("precio-actual").textContent = "No definido";
+  }
+}
+// Guardar nuevo precio
+document.getElementById("guardar-precio").addEventListener("click", async () => {
+  const nuevoPrecio = parseInt(document.getElementById("nuevo-precio").value);
+
+  if (isNaN(nuevoPrecio)) {
+    document.getElementById("mensaje-precio").textContent = "Ingrese un número válido.";
+    return;
+  }
+
+  await setDoc(doc(db, "config", "precio"), {
+    valor: nuevoPrecio
+  });
+
+  document.getElementById("mensaje-precio").textContent = "Precio actualizado con éxito ";
+  cargarPrecioActual();
+});
+
+cargarPrecioActual();
+
+    const turnosContainer = document.getElementById('turnos-container');
+
+    async function mostrarTurnos() {
+      turnosContainer.innerHTML = "<h2>Turnos agendados:</h2>";
+
+      const snapshot = await getDocs(collection(db, "turnos"));
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+
+        const turnoDiv = document.createElement("div");
+        turnoDiv.classList.add("turno-item");
+
+        turnoDiv.innerHTML = `
+          <p><strong>Nombre:</strong> ${data.nombre}</p>
+          <p><strong>Horario:</strong> ${data.rango}</p>
+          <p><strong>UID:</strong> ${data.uid}</p>
+          <button onclick="eliminarTurno('${docSnap.id}')">❌ Eliminar</button>
+          <button onclick="abrirModalParaEditar('${docSnap.id}')">🕐 Cambiar horario</button>
+          <hr/>
+        `;
+
+        turnosContainer.appendChild(turnoDiv);
+      });
+    }
+
+    window.eliminarTurno = async (id) => {
+      if (confirm("¿Estás seguro de eliminar este turno?")) {
+        await deleteDoc(doc(db, "turnos", id));
+        alert("Turno eliminado.");
+        mostrarTurnos(); // Recargar lista
+      }
+    };
+
+    window.moverTurno = async (id, rangoActual) => {
+      const nuevoRango = prompt(`Horario actual: ${rangoActual}\nIngresá nuevo rango horario:`);
+
+      if (nuevoRango && nuevoRango.trim() !== "") {
+        const turnoRef = doc(db, "turnos", id);
+        await updateDoc(turnoRef, {
+          rango: nuevoRango.trim()
+        });
+        alert("Horario actualizado.");
+        mostrarTurnos();
+      }
+    };
+
+    mostrarTurnos();
+    const modal = document.getElementById("modal-horarios");
+const carruselContainer = document.getElementById("carrusel-horarios");
+let turnoSeleccionadoId = null;
+
+const horariosDisponibles = [
+  "9:00 - 9:30", "9:30 - 10:00", "10:00 - 10:30",
+  "10:30 - 11:00", "11:00 - 11:30", "11:30 - 12:00"
+];
+
+function abrirModalParaEditar(id) {
+  turnoSeleccionadoId = id;
+  carruselContainer.innerHTML = "";
+
+  horariosDisponibles.forEach(horario => {
+    const boton = document.createElement("button");
+    boton.textContent = horario;
+    boton.onclick = () => {
+      document.querySelectorAll("#carrusel-horarios button").forEach(b => b.classList.remove("seleccionado"));
+      boton.classList.add("seleccionado");
+      boton.dataset.seleccionado = horario;
+    };
+    carruselContainer.appendChild(boton);
+  });
+
+  modal.style.display = "flex";
+}
+window.abrirModalParaEditar = abrirModalParaEditar;
+
+document.getElementById("confirmar-cambio").addEventListener("click", async () => {
+  const seleccionado = document.querySelector("#carrusel-horarios button.seleccionado");
+  if (!seleccionado) {
+    alert("Seleccioná un horario primero.");
+    return;
+  }
+
+  const nuevoHorario = seleccionado.textContent;
+
+  // Obtener los datos del turno original
+  const turnoRefViejo = doc(db, "turnos", turnoSeleccionadoId);
+  const docSnap = await getDoc(turnoRefViejo);
+  if (!docSnap.exists()) {
+    alert("El turno original no existe.");
+    return;
+  }
+
+  const data = docSnap.data();
+
+  // Crear nuevo documento con el nuevo horario como ID
+  const turnoRefNuevo = doc(db, "turnos", nuevoHorario);
+  await setDoc(turnoRefNuevo, {
+    ...data,
+    rango: nuevoHorario
+  });
+
+  // Eliminar el documento viejo
+  await deleteDoc(turnoRefViejo);
+
+  alert("Horario actualizado.");
+  modal.style.display = "none";
+  mostrarTurnos();
+});
+
+document.getElementById("cancelar-cambio").addEventListener("click", () => {
+  modal.style.display = "none";
+});
+  </script>
+  
+  
+
+ 
+</body>
+</html>

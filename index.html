@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="stylelogin.css" />
+    <title>inicio de sesion</title>
+</head>
+<body>
+  <div class="container">
+    <section id="login">
+        <h2>Iniciar sesión</h2>
+        <form id="login-form">
+          <input type="email" id="email" placeholder="Email" required />
+          <input type="password" id="password" placeholder="Contraseña" required />
+          <button type="submit">Ingresar</button>
+        </form>
+        <p id="login-error" style="color:red;"></p>
+      </section>
+      <section id="register">
+        <h2>Registrarse</h2>
+        <form id="register-form">
+          <input type="email" id="register-email" placeholder="Email" required />
+          <input type="password" id="register-password" placeholder="Contraseña" required />
+          <button type="submit">Registrarme</button>
+        </form>
+        <p id="register-error" style="color:red;"></p>
+      </section>
+    </div>
+        <!-- Firebase SDKs -->
+<script type="module">
+    // Import the functions you need from the SDKs
+    import { firebaseConfig } from './firebase-config.js';
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+  
+  
+const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+  
+    document.getElementById("login-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+  
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+  
+    
+  
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+  
+      // Verificamos si es el admin por UID
+      const uidAdmin = "UvbAAWSsbydZa8vIhPw4MyFbvfO2"; // Copialo desde Firebase Users
+      if (user.uid === uidAdmin) {
+        alert("¡Bienvenido, Admin!");
+        window.location.href = "admin.html"; // redirigí al panel admin
+      } else {
+        alert("Inicio exitoso como cliente");
+        window.location.href = "turnos.html"; // redirigí a la pantalla de turnos
+      }
+    } catch (error) {
+      document.getElementById("login-error").textContent = "Error: " + error.message;
+    }
+  });
+   // REGISTRO
+   document.getElementById("register-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("register-email").value;
+    const password = document.getElementById("register-password").value;
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      alert("Registro exitoso. Ahora podés iniciar sesión.");
+      document.getElementById("register-form").reset();
+    } catch (error) {
+      document.getElementById("register-error").textContent = "Error: " + error.message;
+    }
+  });
+  </script>
+      
+</body>
+</html>
